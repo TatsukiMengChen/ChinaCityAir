@@ -74,7 +74,7 @@ class DataModule:
         count_frame.pack(fill=tk.X, padx=10, pady=5)
         
         Label(count_frame, text="爬取数量:").pack(side=tk.LEFT)
-        self.count_var = tk.StringVar(value="100")
+        self.count_var = tk.StringVar(value="50")
         count_spinbox = Spinbox(count_frame, from_=10, to=1000,
                                    textvariable=self.count_var,
                                    width=10)
@@ -88,7 +88,7 @@ class DataModule:
         delay_frame.pack(fill=tk.X, padx=10, pady=5)
         
         Label(delay_frame, text="请求间隔:").pack(side=tk.LEFT)
-        self.delay_var = tk.StringVar(value="2.0")
+        self.delay_var = tk.StringVar(value="0.5")
         delay_spinbox = Spinbox(delay_frame, from_=0.5, to=10, increment=0.5,
                                    textvariable=self.delay_var,
                                    width=10)

@@ -120,9 +120,14 @@ class AirQualitySpider:
                     self.logger.debug(f"API {api_path} 失败: {e}")
                     continue
             
-            # 如果API接口都失败，尝试解析主页面的数据
-            self.logger.info("尝试解析主页面数据")
-            return self.parse_main_page_data(soup)
+            # 如果API接口都失败，尝试解析主页面的数据表格
+            self.logger.info("尝试解析主页面表格数据")
+            data = self.parse_html_data(soup)
+            if data:
+                return data
+            else:
+                self.logger.warning("未能解析到任何城市数据")
+                return []
             
         except Exception as e:
             self.logger.error(f"获取城市空气质量数据失败: {e}")
@@ -209,7 +214,7 @@ class AirQualitySpider:
     
     def parse_main_page_data(self, soup) -> List[Dict]:
         """
-        解析主页面的数据
+        解析主页面的数据（已废弃示例数据，直接用表格解析）
         
         Args:
             soup: 主页面的BeautifulSoup对象
@@ -217,48 +222,8 @@ class AirQualitySpider:
         Returns:
             解析出的数据列表
         """
-        # 创建示例数据（实际项目中需要根据真实页面结构调整）
-        sample_data = [
-            {
-                'city': '北京',
-                'aqi': 85,
-                'pm25': 62,
-                'pm10': 95,
-                'so2': 8,
-                'no2': 45,
-                'co': 0.8,
-                'o3': 120,
-                'quality': '良',
-                'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-            },
-            {
-                'city': '上海',
-                'aqi': 78,
-                'pm25': 55,
-                'pm10': 88,
-                'so2': 6,
-                'no2': 42,
-                'co': 0.7,
-                'o3': 115,
-                'quality': '良',
-                'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-            },
-            {
-                'city': '广州',
-                'aqi': 92,
-                'pm25': 68,
-                'pm10': 102,
-                'so2': 12,
-                'no2': 48,
-                'co': 0.9,
-                'o3': 135,
-                'quality': '良',
-                'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-            }
-        ]
-        
-        self.logger.info("使用示例数据进行测试")
-        return sample_data
+        # 直接调用 parse_html_data
+        return self.parse_html_data(soup)
     
     def standardize_city_item(self, item: Dict, timestamp: str) -> Optional[Dict]:
         """

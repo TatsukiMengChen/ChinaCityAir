@@ -15,11 +15,21 @@ from plotly.subplots import make_subplots
 import plotly.offline as pyo
 from datetime import datetime
 import os
+import sys
 from typing import Optional, List, Dict, Any
 
-# 设置中文字体
-plt.rcParams['font.sans-serif'] = ['SimHei', 'Microsoft YaHei']
-plt.rcParams['axes.unicode_minus'] = False
+# 添加父目录到路径
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+
+# 导入字体配置
+try:
+    from utils.font_config import setup_chinese_font
+    # 设置中文字体
+    setup_chinese_font()
+except ImportError:
+    # 备用字体设置
+    plt.rcParams['font.sans-serif'] = ['SimHei', 'Microsoft YaHei']
+    plt.rcParams['axes.unicode_minus'] = False
 
 class AdvancedCharts:
     """高级图表类"""
@@ -39,6 +49,13 @@ class AdvancedCharts:
         # 设置图表样式
         sns.set_style("whitegrid")
         plt.style.use('seaborn-v0_8')
+        
+        # 确保中文字体设置
+        try:
+            setup_chinese_font()
+        except:
+            plt.rcParams['font.sans-serif'] = ['SimHei', 'Microsoft YaHei', 'DejaVu Sans']
+            plt.rcParams['axes.unicode_minus'] = False
     
     def plot_correlation_heatmap(self, data: pd.DataFrame,
                                 columns: List[str],
