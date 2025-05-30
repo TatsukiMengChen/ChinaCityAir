@@ -187,10 +187,25 @@ class BasicCharts:
         plt.figure(figsize=(10, 8))
         
         if color_column and color_column in data.columns:
-            scatter = plt.scatter(data[x_column], data[y_column], 
-                                c=data[color_column], cmap='viridis',
-                                alpha=0.7, s=50, edgecolors='black', linewidth=0.5)
-            plt.colorbar(scatter, label=color_column)
+            # 如果颜色列是文本类型，创建颜色映射
+            if data[color_column].dtype == 'object':
+                unique_values = data[color_column].unique()
+                color_map = {val: self.colors[i % len(self.colors)] for i, val in enumerate(unique_values)}
+                colors = [color_map[val] for val in data[color_column]]
+                scatter = plt.scatter(data[x_column], data[y_column], 
+                                    c=colors, alpha=0.7, s=50, 
+                                    edgecolors='black', linewidth=0.5)
+                
+                # 创建图例
+                from matplotlib.patches import Patch
+                legend_elements = [Patch(facecolor=color_map[val], label=val) for val in unique_values]
+                plt.legend(handles=legend_elements, title=color_column, loc='upper right')
+            else:
+                # 数值类型，使用colormap
+                scatter = plt.scatter(data[x_column], data[y_column], 
+                                    c=data[color_column], cmap='viridis',
+                                    alpha=0.7, s=50, edgecolors='black', linewidth=0.5)
+                plt.colorbar(scatter, label=color_column)
         else:
             plt.scatter(data[x_column], data[y_column], 
                        color=self.colors[0], alpha=0.7, s=50,

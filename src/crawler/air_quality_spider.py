@@ -43,6 +43,11 @@ class AirQualitySpider:
         # 数据保存路径
         self.data_dir = os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'raw')
         os.makedirs(self.data_dir, exist_ok=True)
+        
+        # GUI回调函数
+        self.progress_callback = None
+        self.status_callback = None
+        self.should_stop = False
     
     def setup_logging(self):
         """设置日志配置"""
@@ -377,6 +382,76 @@ class AirQualitySpider:
         import random
         delay = random.uniform(min_delay, max_delay)
         time.sleep(delay)
+    
+    def set_progress_callback(self, callback):
+        """设置进度回调函数"""
+        self.progress_callback = callback
+    
+    def set_status_callback(self, callback):
+        """设置状态回调函数"""
+        self.status_callback = callback
+    
+    def stop(self):
+        """停止爬取"""
+        self.should_stop = True
+    
+    def crawl_data(self, count: int = 100, delay: float = 1.0) -> Optional[str]:
+        """
+        爬取指定数量的数据
+        
+        Args:
+            count: 爬取数据条数
+            delay: 请求间隔
+            
+        Returns:
+            保存的文件路径
+        """
+        try:
+            if self.status_callback:
+                self.status_callback("开始爬取空气质量数据...")
+            
+            all_data = []
+            current_count = 0
+            
+            while current_count < count and not self.should_stop:
+                # 获取一批数据
+                data = self.get_city_air_quality()
+                
+                if data:
+                    all_data.extend(data)
+                    current_count = len(all_data)
+                    
+                    if self.progress_callback:
+                        self.progress_callback(current_count, count)
+                    
+                    if self.status_callback:
+                        self.status_callback(f"已获取 {current_count} 条数据")
+                
+                # 添加延迟
+                if current_count < count and not self.should_stop:
+                    time.sleep(delay)
+            
+            if self.should_stop:
+                if self.status_callback:
+                    self.status_callback("爬取已停止")
+                return None
+            
+            if not all_data:
+                raise Exception("未能获取到有效数据")
+            
+            # 保存数据
+            filepath = self.save_to_csv(all_data[:count])  # 限制数据量
+            
+            if self.status_callback:
+                self.status_callback(f"爬取完成，共获取 {len(all_data[:count])} 条数据")
+            
+            return filepath
+            
+        except Exception as e:
+            if self.status_callback:
+                self.status_callback(f"爬取失败: {str(e)}")
+            self.logger.error(f"爬取数据失败: {e}")
+            return None
 
 
 def main():
