@@ -237,7 +237,6 @@ class DataModule:
             # 设置回调函数
             self.spider.set_progress_callback(progress_callback)
             self.spider.set_status_callback(status_callback)
-            
             # 开始爬取
             filename = self.spider.crawl_data(count=count, delay=delay)
             
